@@ -13,3 +13,6 @@ tags = ["Mesh", "Bake"]
 
 [permissions]
 files = "Writes baked textures and exported meshes to disk"
+
+[build]
+paths_exclude_pattern = ["__pycache__/", "/.git/", "/*.zip"]

@@ -43,6 +43,12 @@ See [`smart_retopo/README.md`](smart_retopo/README.md).
 blender -b --factory-startup -P tests/test_pipeline.py
 #   ...or with the bpy wheel:  pip install bpy && python tests/test_pipeline.py
 
+# Lint (same check as CI)
+ruff check .
+
+# Check the manifest version (add a tag, e.g. v0.2.0, to check it matches)
+python3 tests/ci/check_version.py
+
 # Build the extension zip
 ./scripts/build.sh            # -> dist/smart_retopo-<version>.zip
 
