@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changed: ${{ steps.version.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build extension
+        run: bash scripts/build.sh
+
+      - name: Detect version change
+        id: version
+        run: |
+          get_version() { grep -E '^version' | sed -E 's/.*"(.*)".*/\1/'; }
+          MANIFEST=smart_retopo/blender_manifest.toml
+          VERSION="$(get_version < "$MANIFEST")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          CHANGED=false
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            BEFORE="${{ github.event.before }}"
+            if [ -z "${BEFORE//0/}" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              OLD=""   # new branch or unreachable base: treat as changed
+            else
+              OLD="$(git show "$BEFORE:$MANIFEST" 2>/dev/null | get_version || true)"
+            fi
+            [ "$OLD" != "$VERSION" ] && CHANGED=true
+          fi
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smart_retopo-${{ steps.version.outputs.version }}
+          path: dist/*.zip
+
+  release:
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: smart_retopo-${{ needs.build.outputs.version }}
+          path: dist
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ needs.build.outputs.version }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; skipping."
+            exit 0
+          fi
+          gh release create "$TAG" dist/*.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Smart Retopo $TAG" \
+            --generate-notes
