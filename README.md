@@ -61,4 +61,4 @@ Headless run:
 blender -b -P smart_retopo/cli.py -- -i in.glb -o out.glb --faces 4000 --report result.json
 ```
 
-Tested with Blender 5.2 LTS.
+Supports Blender 5.0 and later. CI tests 5.0 and 5.2 LTS.
