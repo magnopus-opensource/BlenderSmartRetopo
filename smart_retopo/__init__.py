@@ -11,7 +11,7 @@ or headless:
 bl_info = {
     "name": "Smart Retopo",
     "author": "Magnopus",
-    "version": (1, 0, 0),
+    "version": (0, 1, 0),
     "blender": (4, 2, 0),
     "location": "View3D > Sidebar > Smart Retopo",
     "description": "Combine meshes, retopologize with QuadriFlow, generate UVs and bake textures with Cycles",
