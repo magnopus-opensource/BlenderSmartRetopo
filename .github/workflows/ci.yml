@@ -25,14 +25,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Ruff
-        run: pipx run ruff==0.16.8 check --output-format github .
-      - name: Manifest version
-        run: python3 tests/ci/check_version.py
-      - name: REUSE compliance (every file has copyright + license info)
-        run: pipx run reuse==6.2.0 lint
-      - name: License copies are identical
-        run: cmp LICENSES/GPL-3.0-or-later.txt LICENSE && cmp LICENSES/GPL-3.0-or-later.txt smart_retopo/LICENSE
+      # Same checks as `make check` locally: ruff, REUSE + license copies,
+      # manifest version, result schema vs code. Tool versions are pinned in the Makefile.
+      - name: make check
+        run: make check RUFF_FLAGS=--output-format=github
 
   pr-title:
     # Squash-merge titles drive release-please, so they must be Conventional Commits.
@@ -63,8 +59,8 @@ jobs:
           series: ${{ matrix.blender }}
       - name: Validate extension
         run: blender --command extension validate smart_retopo
-      - name: End-to-end pipeline test
-        run: blender -b --factory-startup --python-exit-code 1 -P tests/test_pipeline.py
+      - name: End-to-end pipeline test + result schema
+        run: make test
       - name: Build extension
         run: mkdir -p dist && blender --command extension build --source-dir smart_retopo --output-dir dist
       - if: failure()

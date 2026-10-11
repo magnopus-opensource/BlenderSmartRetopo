@@ -28,12 +28,23 @@ See [`smart_retopo/README.md`](smart_retopo/README.md).
 
 ## Development
 
+Start with [`AGENTS.md`](AGENTS.md) (also `CLAUDE.md`): repo map, commands, rules and the public interface. [`docs/architecture.md`](docs/architecture.md) explains how the pipeline works, and [`docs/decisions/`](docs/decisions/) records why things are the way they are.
+
+```sh
+make check   # lint, licensing, version, result schema (no Blender needed)
+make test    # end-to-end test (Blender or `pip install bpy`)
+make build   # dist/smart_retopo-<version>.zip
+```
+
 ### Repo layout
 
 | Path | |
 |---|---|
 | `smart_retopo/` | The extension package (`blender_manifest.toml`, operator, panel, `core/` pipeline package (one module per step), `cli.py` headless runner) |
 | `tests/test_pipeline.py` | End-to-end test: builds a scene, runs the operator, asserts on mesh/UVs/baked maps |
+| `tests/ci/` | Stdlib-only checks: manifest version, result JSON schema |
+| `docs/` | Architecture, decision records, result JSON schema |
+| `Makefile` | `make check` / `make test` / `make build`, shared with CI |
 | `scripts/build.sh` | Builds the installable zip into `dist/` |
 
 ### Environment

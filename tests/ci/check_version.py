@@ -12,16 +12,26 @@ Exits non-zero with a message on the first problem found.
 import pathlib
 import re
 import sys
-import tomllib
+
+try:
+    import tomllib  # Python 3.11+
+except ImportError:  # e.g. macOS system Python 3.9: read the top-level key directly
+    tomllib = None
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "smart_retopo" / "blender_manifest.toml"
 SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z.-]+)?$")
 
 
+def read_version(text: str) -> str:
+    if tomllib is not None:
+        return tomllib.loads(text).get("version", "")
+    m = re.search(r'^version\s*=\s*"([^"]*)"', text, re.M)
+    return m.group(1) if m else ""
+
+
 def main(argv: list[str]) -> int:
-    manifest = tomllib.loads(MANIFEST.read_text(encoding="utf-8"))
-    version = manifest.get("version", "")
+    version = read_version(MANIFEST.read_text(encoding="utf-8"))
     errors = []
 
     if not SEMVER.match(version):
