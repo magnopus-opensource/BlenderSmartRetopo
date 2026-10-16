@@ -71,7 +71,8 @@ Removing or renaming any of these needs a `!` in the PR title (`feat!:`), or a `
 These are covered in more detail in [`docs/architecture.md`](docs/architecture.md):
 
 - Base color, roughness and metallic are baked by **temporarily swapping material outputs to emission**. Always restore them, even on failure.
-- **Source objects are hidden during the bake**, because they'd occlude AO. Don't remove that.
+- **Source objects are hidden during the bake**, because they'd occlude AO. Don't remove that. A provided low-poly is hidden too.
+- A **provided low-poly** (`low_poly_object`) is copied, never modified, and never used as a bake source. `uv_mode=EXISTING` is only valid with one.
 - QuadriFlow needs a manifold mesh. The voxel pre-pass and fallback in `retopo.py` handle that. Its face counts are approximate.
 - The **cage extrusion and ray distance** default to 1% and 5% of the bounding-box diagonal when set to 0.
 - On failure, the pipeline removes its own `_high` and `_retopo` objects. Keep the scene clean.

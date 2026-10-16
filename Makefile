@@ -42,7 +42,7 @@ test:
 	else \
 	  $(PYTHON) tests/test_pipeline.py; \
 	fi
-	$(PYTHON) tests/ci/check_result_schema.py tests/_output/result.json
+	$(PYTHON) tests/ci/check_result_schema.py tests/_output/result.json tests/_output/result_low_poly.json
 
 build:
 	./scripts/build.sh
