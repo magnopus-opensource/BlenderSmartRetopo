@@ -18,7 +18,7 @@ It's intended for artists: it has an interactive UI and can also be driven by au
 | `smart_retopo/operators.py`, `props.py`, `ui.py` | The `object.smart_retopo` operator, its shared property mixin, and the sidebar panel |
 | `smart_retopo/cli.py` | Headless runner: `blender -b -P smart_retopo/cli.py -- -i in.glb -o out.glb ...` |
 | `smart_retopo/blender_manifest.toml` | **Only** source of the version and metadata. No `bl_info`. |
-| `tests/test_pipeline.py` | End-to-end test. Writes `tests/_output/result.json`. |
+| `tests/test_pipeline.py` | End-to-end tests: QuadriFlow, a provided low-poly (existing and generated UVs) and settings validation. Writes `tests/_output/result.json` and `result_low_poly.json`. |
 | `tests/ci/` | Stdlib-only checks: `check_version.py`, `check_result_schema.py` |
 | `docs/architecture.md` | How the pipeline works, and behaviour that's easy to break. **Read before changing `core/`.** |
 | `docs/result.schema.json` | Contract for the result JSON |
@@ -35,7 +35,7 @@ python3 tests/ci/check_result_schema.py        # docs/result.schema.json matches
 
 # End-to-end test (Blender on PATH, or the bpy wheel: pip install bpy && python3 tests/test_pipeline.py)
 blender -b --factory-startup --python-exit-code 1 -P tests/test_pipeline.py
-python3 tests/ci/check_result_schema.py tests/_output/result.json   # validate the result the test produced
+python3 tests/ci/check_result_schema.py tests/_output/result.json tests/_output/result_low_poly.json   # validate the results the test produced
 
 ./scripts/build.sh                             # dist/smart_retopo-<version>.zip
 ```
