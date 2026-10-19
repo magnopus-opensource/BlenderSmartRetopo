@@ -76,7 +76,7 @@ def test_quadriflow():
     assert r == {"FINISHED"}, r
     res = _result()
     print(json.dumps(res, indent=1))
-    # Saved for tests/ci/check_result_schema.py (run by `make test` and CI).
+    # Saved so tests/ci/check_result_schema.py can validate a real result.
     with open(os.path.join(OUT, "result.json"), "w") as f:
         json.dump(res, f, indent=1)
 
@@ -172,31 +172,10 @@ def test_invalid_settings():
 def main():
     smart_retopo.register()
     try:
-        objs = build_scene()
-        for o in objs:
-            o.select_set(True)
-        r = bpy.ops.object.smart_retopo(
-            target_faces=2000, texture_size=256, bake_samples=4,
-            bake_maps={"BASE_COLOR", "NORMAL", "ROUGHNESS", "METALLIC", "AO"},
-            output_dir=os.path.join(OUT, "textures"),
-        )
-        assert r == {"FINISHED"}, r
-        res = json.loads(bpy.context.window_manager["smart_retopo_last_result"])
-        print(json.dumps(res, indent=1))
-        # Saved so tests/ci/check_result_schema.py can validate a real result.
-        with open(os.path.join(OUT, "result.json"), "w") as f:
-            json.dump(res, f, indent=1)
-
-        low = bpy.data.objects[res["object_name"]]
-        assert 1000 < res["result_faces"] < 4000, res["result_faces"]
-        assert [u.name for u in low.data.uv_layers] == ["UVMap"]
-        assert len(low.data.materials) == 1
-        assert set(res["images"]) == {"BASE_COLOR", "NORMAL", "ROUGHNESS", "METALLIC", "AO"}
-        for p in res["images"].values():
-            assert os.path.isfile(p), p
-        assert not any(o.name.endswith("_high") for o in bpy.data.objects), "high-poly not cleaned up"
-
-        bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "result.blend"))
+        test_quadriflow()
+        test_provided_low_poly("EXISTING")
+        test_provided_low_poly("GENERATE")
+        test_invalid_settings()
         print("SMART_RETOPO_TEST: PASS")
     finally:
         smart_retopo.unregister()
